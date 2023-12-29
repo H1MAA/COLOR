@@ -7,6 +7,7 @@
 #include <Timer.h>
 #include <PIDF.h>
 
+//test
 //tweak_ROS_parameters//
 
 //from ROS//
@@ -68,8 +69,8 @@ double setpoint[2] = {0, 0 };                              // Array to store set
 double pwm_value[2] = { 0, 0 };                            // Array to store PWM value for two motors
 
 //DEFINE PID
-MIA::PIDF velocity_pid[] = { MIA::PIDF(Kp_1, Ki_1, Kd_1, Ts),
-                             MIA::PIDF(Kp_2, Ki_2, Kd_2, Ts) };
+MIA::PIDF velocity_pid[] = {MIA::PIDF(KP1, KI1, KD1, Ts),
+                             MIA::PIDF(KP2, KI2, KD2, Ts)};
 
 //DEFINE TIMER 
 Timer myTimer;
@@ -84,6 +85,7 @@ ros::Publisher pwm_pub(TOPIC_NAME_PWM_FEEDBACK, &pwm_feedback_msg);   //pwm topi
 
 std_msgs::Float32MultiArray velocity_feedback_msg;                     
 ros::Publisher velocity_pub(TOPIC_NAME_VELOCITY_FEEDBACK, &velocity_feedback_msg);
+
 
 //DEFINE CALLBACK FUNCTION FOR ASSIGNING SPEEDS
 void callback_speeds(const std_msgs::Float32MultiArray &speeds_msg)
@@ -107,26 +109,29 @@ ros::Subscriber<std_msgs::Float32MultiArray> sub_speeds(
     TOPIC_NAME_SPEED_SETPOINTS,
     &callback_speeds);
 
+void initEncoders();
+void initRos();
+void debugROS();
 
 
 
 
 
 
-----------------------------------------------------//SETUP//-------------------------------------------------------------------
+
+// ----------------------------------------------------//SETUP//-------------------------------------------------------------------
 
 void setup() {
   // put your setup code here, to run once:
-
   Serial.begin(BAUD_RATE);
   init_pid();
-  initEncoders()
+  initEncoders();
   initRos();
-  myTimer.every(period, pidRoutine);
+  myTimer.every(PID_PERIOD, pidRoutine);
 }
 
 
-----------------------------------------------------//LOOP//-------------------------------------------------------------------
+// ----------------------------------------------------//LOOP//-------------------------------------------------------------------
 void loop()
 {
   myTimer.update();
@@ -134,12 +139,12 @@ void loop()
 }
 
 
-----------------------------------------------------//PID_ROUTINE//-------------------------------------------------------------------
+// ----------------------------------------------------//PID_ROUTINE//-------------------------------------------------------------------
 
 void pidRoutine() {
   for (int i = 0; i < 2; i++) {
 
-    speed[i] = (counts[i] - lastcounts[i]) * radius / (ppr * Ts);          // (m/s)
+    speed[i] = (counts[i] - lastcounts[i]) * RADIUS / (ppr * Ts);          // (m/s)
 
     pwm_value[i] = velocity_pid[i].calculate(speed[i]);
 
@@ -160,7 +165,7 @@ void pidRoutine() {
 
 
 
-----------------------------------------------------//ENCODER_ISR//-------------------------------------------------------------------
+// ----------------------------------------------------//ENCODER_ISR//-------------------------------------------------------------------
 
 void ISR_encoderPinA_M1()
 {
@@ -168,7 +173,7 @@ void ISR_encoderPinA_M1()
 }
 void ISR_encoderPinB_M1()
 {
-  counts[0] += digitalRead(PIN_ENCODER_A[0]) == digitalRead(PIN_ENCODER_B[0]) ? -1 : 1;
+//  counts[0] += digitalRead(PIN_ENCODER_A[0]) == digitalRead(PIN_ENCODER_B[0]) ? -1 : 1;
 }
 
 
@@ -178,7 +183,7 @@ void ISR_encoderPinA_M2()
 }
 void ISR_encoderPinB_M2() 
 {
-  counts[0] += digitalRead(PIN_ENCODER_A[0]) == digitalRead(PIN_ENCODER_B[0]) ? -1 : 1;
+//  counts[0] += digitalRead(PIN_ENCODER_A[0]) == digitalRead(PIN_ENCODER_B[0]) ? -1 : 1;
 }
 
 
@@ -187,13 +192,14 @@ void ISR_encoderPinB_M2()
 
 
 
-----------------------------------------------------//INITIALIZATION DUNCTIONS//-------------------------------------------------------------------
+//----------------------------------------------------//INITIALIZATION DUNCTIONS//-------------------------------------------------------------------
 
 void init_pid() {
   for (int i = 0; i < 2; i++) {
     velocity_pid[i].limitOutput(MIN_OUTPUT, MAX_OUTPUT);
     velocity_pid[i].setpoint(setpoint[i]);
   }
+}
 
 void initEncoders()
 {
@@ -235,12 +241,12 @@ void initRos()
     nh.initNode();                                      //      INITIALIZE NODE
     nh.advertise(pwm_pub);                              //ADVERTISE
     nh.advertise(velocity_pub);
-    nh.advertise(encoders_0);
-    nh.advertise(encoders_1);
-    nh.advertise(c_0);
-    nh.advertise(c_1);
+    // nh.advertise(encoders_0);
+    // nh.advertise(encoders_1);
+    // nh.advertise(c_0);
+    // nh.advertise(c_1);
     nh.subscribe(sub_speeds);                           //SUBSCRIBE
-    nh.subscribe(params);
+    // nh.subscribe(params);
     
     // ROS Float32MultiArray msg setup
     char dim0_label[] = "PWM";
@@ -266,7 +272,7 @@ void initRos()
 
 
 
-----------------------------------------------------//FEED_BACK (DEBUGGING)//-------------------------------------------------------------------
+//----------------------------------------------------//FEED_BACK (DEBUGGING)//-------------------------------------------------------------------
 
 void debugROS()
 {
@@ -276,7 +282,7 @@ void debugROS()
     pwm_pub.publish(&pwm_feedback_msg); 
 
     // Feedback from encoder
-    velocity_feedback_msg.data[0] = (float)speed[0];      // Measured velocity in RPM
-    velocity_feedback_msg.data[1] = (float)speed[1]);      // Measured velocity in RPM
+    velocity_feedback_msg.data[0] = float(speed[0]);      // Measured velocity in RPM
+    velocity_feedback_msg.data[1] = float(speed[1]);      // Measured velocity in RPM
     velocity_pub.publish(&velocity_feedback_msg); 
 }
