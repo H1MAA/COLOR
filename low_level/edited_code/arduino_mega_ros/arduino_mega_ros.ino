@@ -1,7 +1,4 @@
 
-#include <helper_3dmath.h>
-
-
 #include <ros.h>
 #include <std_msgs/Int16.h>
 #include <std_msgs/Float64.h>
@@ -274,8 +271,8 @@ void initRos()
 void debugROS()
 {
     // Feedback from PID output
-    pwm_feedback_msg.data[0] = (float)pwm[0];
-    pwm_feedback_msg.data[1] = (float)pwm[1];
+    pwm_feedback_msg.data[0] = (float)pwm_value[0];
+    pwm_feedback_msg.data[1] = (float)pwm_value[1];
     pwm_pub.publish(&pwm_feedback_msg); 
 
     // Feedback from encoder
