@@ -40,10 +40,9 @@ def imu_rotation(data):
     angle = data.data
 
 def YOLO_Callback(data):
-    ######################################################
     # This is the function to compute necessary commands #
     # to preproccess the data and compute the movement   #
-    ######################################################
+    
     pass
 
 def initial_mapping():
