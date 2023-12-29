@@ -199,7 +199,7 @@ void velocityPidRoutine(void)
     // the output to the motors
 
     // Motor1
-    speeds[0] = (((1.0*(counter[0]-lastCounter[0])/ENCODER_RESOLUTION)*2*PI))/(1.0*(PID_PERIOD/1000.0));   //speed(0) (radian/s)
+    speed[0] = (((1.0*(counter[0]-lastCounter[0])/ENCODER_RESOLUTION)*2*PI))/(1.0*(PID_PERIOD/1000.0));   //speed(0) (radian/s)
     pwm[0]       = velocity_pid[0].calculate(speeds[0]);    
 
     if(velocity_pid[0].setpoint()==0){
@@ -217,7 +217,7 @@ void velocityPidRoutine(void)
     
 
     // Motor2
-    speeds[1] = (((1.0*(counter[1]-lastCounter[1])/ENCODER_RESOLUTION)*2*PI))/(1.0*(PID_PERIOD/1000.0));   //speed(1) (radian/s)
+    speed[1] = (((1.0*(counter[1]-lastCounter[1])/ENCODER_RESOLUTION)*2*PI))/(1.0*(PID_PERIOD/1000.0));   //speed(1) (radian/s)
     pwm[1]       = velocity_pid[1].calculate(speeds[1]);
 
     if(velocity_pid[1].setpoint()==0){
